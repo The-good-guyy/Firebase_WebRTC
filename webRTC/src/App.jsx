@@ -230,6 +230,14 @@ function Videos({ mode, callId, setPage }) {
     <div className="videos">
       <video ref={localRef} autoPlay playsInline className="local" muted />
       <video ref={remoteRef} autoPlay playsInline className="remote" />
+      {roomId ? (
+        <div className="">
+          <h2>RoomId</h2>
+          <h2>{roomId}</h2>
+        </div>
+      ) : (
+        <></>
+      )}
 
       <div className="buttonsContainer">
         <button
@@ -239,7 +247,6 @@ function Videos({ mode, callId, setPage }) {
         >
           <ImPhoneHangUp />
         </button>
-        {/* <h1>{roomId}</h1> */}
         <div tabIndex={0} role="button" className="more button">
           <HiDotsVertical />
           <div className="popover">
