@@ -1,9 +1,8 @@
 import { useRef, useState } from 'react';
 
 import { initializeApp } from 'firebase/app';
-import { getFirestore } from 'firebase/firestore/lite';
-import { collection } from 'firebase/firestore';
-// import { doc, setDoc } from 'firebase/firestore';
+import { getFirestore } from 'firebase/firestore';
+import { collection, doc, addDoc, setDoc } from 'firebase/firestore';
 import { ImPhoneHangUp } from 'react-icons/im';
 import { HiDotsVertical } from 'react-icons/hi';
 import { MdCopyAll } from 'react-icons/md';
@@ -104,16 +103,28 @@ function Videos({ mode, callId, setPage }) {
     setWebcamActive(true);
 
     if (mode === 'create') {
-      const callDoc = collection(firestore, 'calls').doc();
-      // const callDoc = firestore.collection('calls').doc();
-      console.log(firestore);
-      const offerCandidates = callDoc.collection('offerCandidates');
-      const answerCandidates = callDoc.collection('answerCandidates');
+      const callsCollection = collection(firestore, 'calls');
+      const callDoc = doc(callsCollection);
+      console.log(callDoc);
+      const offerCandidates = collection(
+        firestore,
+        'calls',
+        callDoc.id,
+        'offerCandidates'
+      );
+      const answerCandidates = collection(
+        firestore,
+        'calls',
+        callDoc.id,
+        'answerCandidates'
+      );
 
       setRoomId(callDoc.id);
 
       pc.onicecandidate = (event) => {
-        event.candidate && offerCandidates.add(event.candidate.toJSON());
+        event.candidate &&
+          // offerCandidates.add(event.candidate.toJSON()) &&
+          addDoc(offerCandidates, event.candidate.toJSON());
       };
 
       const offerDescription = await pc.createOffer();
@@ -124,7 +135,7 @@ function Videos({ mode, callId, setPage }) {
         type: offerDescription.type,
       };
 
-      await callDoc.set({ offer });
+      await setDoc(callDoc, { offer });
 
       callDoc.onSnapshot((snapshot) => {
         const data = snapshot.data();
